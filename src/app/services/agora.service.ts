@@ -25,6 +25,7 @@ export class AgoraService {
   };
 
   async startBasicCall() {
+    console.log("Starting basic call");
     // Create an instance of the Agora Engine
     this.agoraEngine = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
 
@@ -57,6 +58,7 @@ export class AgoraService {
   }
 
   generateRtcToken(uid: number, channel: string): string {
+    console.log("generating token");
     const priviledgeExpiredTs =
       Math.floor(Date.now() / 1000) + environment.agora.expirationTimeInSeconds;
     const token = RtcTokenBuilder.buildTokenWithUid(
@@ -68,11 +70,13 @@ export class AgoraService {
       environment.agora.expirationTimeInSeconds,
       priviledgeExpiredTs
     );
+    console.log("token", token);
     return token;
   }
 
   async join(uid: number, channel: string) {
     // Join a channel.
+    console.log("Joining");
     await this.agoraEngine.join(
       environment.agora.appId,
       channel,
@@ -81,6 +85,7 @@ export class AgoraService {
     );
     this.message.next('Joined channel: ' + channel);
 
+    console.log("creating local audio track");
     // Create a local audio track from the microphone audio.
     this.channelParameters.localAudioTrack =
       await AgoraRTC.createMicrophoneAudioTrack();

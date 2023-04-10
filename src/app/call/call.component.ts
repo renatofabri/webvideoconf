@@ -7,8 +7,8 @@ import { AgoraService } from '../services/agora.service';
   styleUrls: ['./call.component.scss'],
 })
 export class CallComponent implements OnInit {
-  apiMessage = '';
-  uid = Math.random() * 10;
+  apiMessages = '';
+  uid = Math.floor(Math.random() * 1000);
   channel = '127de39f-7241-49f4-86cc-2bb76255bc64';
 
   constructor(private agoraService: AgoraService) {}
@@ -17,12 +17,15 @@ export class CallComponent implements OnInit {
     this.agoraService.startBasicCall();
 
     this.agoraService.message.subscribe((message: string) => {
-      this.apiMessage = message;
+      this.apiMessages = message;
     });
   }
 
   showMessage(text: string) {
-    this.apiMessage = text;
+    this.apiMessages = text;
+  }
+  token() {
+    console.log(this.agoraService.generateRtcToken(this.uid, "channelTest"));
   }
 
   join() {
