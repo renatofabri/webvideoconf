@@ -1,9 +1,38 @@
 <a href="/">Home</a>
 <div>
-    <span *ngIf="apiMessages">{{ apiMessages }}</span>
+  <span *ngIf="apiMessages">{{ apiMessages }}</span>
 </div>
 <div>
-    <button type="button" id="token" (click)="token()">generate token</button>
-    <button type="button" id="join" (click)="join()">Join</button>
-    <button type="button" id="leave" (click)="leave()">Leave</button>
+  <button type="button" id="token" (click)="token()">generate token</button>
+  <button type="button" id="join" (click)="join()">Join</button>
+  <button type="button" id="leave" (click)="leave()">Leave</button>
 </div>
+<div>
+  <button type="button" id="inItScreen" (click)="inItScreen()">
+    {{ isSharingEnabled ? "Stop Sharing" : "Start Sharing" }}
+  </button>
+  <button type="button" id="muteVideo" (click)="muteVideo()">Mute Video</button>
+  <br /><label> Local Audio Level :</label>
+  <input
+    type="range"
+    min="0"
+    id="localAudioVolume"
+    max="100"
+    step="1"
+    #lav
+    (change)="localAudioVolume(lav.value)"
+  /><br />
+  <label> Remote Audio Level :</label>
+  <input
+    type="range"
+    min="0"
+    id="remoteAudioVolume"
+    max="100"
+    step="1"
+    #rav
+    (change)="remoteAudioVolume(rav.value)"
+  />
+</div>
+<div id="screenContainer"></div>
+<div id="remoteVideoContainer"></div>
+<div id="localVideoContainer"></div>

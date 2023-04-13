@@ -7,9 +7,13 @@ import { AgoraService } from '../services/agora.service';
   styleUrls: ['./call.component.scss'],
 })
 export class CallComponent implements OnInit {
+
   apiMessages = '';
   uid = Math.floor(Math.random() * 1000);
   channel = '127de39f-7241-49f4-86cc-2bb76255bc64';
+
+  isSharingEnabled = false;
+  isMuteVideo = false;
 
   constructor(private agoraService: AgoraService) {}
 
@@ -31,7 +35,23 @@ export class CallComponent implements OnInit {
   join() {
     this.agoraService.join(this.uid, this.channel);
   }
+
   leave() {
     this.agoraService.leave();
+  }
+
+  async inItScreen() {
+    this.agoraService.initScreen(this.isSharingEnabled);
+  }
+
+  muteVideo() {
+
+  }
+
+  localAudioVolume(val: any) {
+    console.log(val);
+  }
+  remoteAudioVolume(val: any) {
+    console.log(val);
   }
 }
