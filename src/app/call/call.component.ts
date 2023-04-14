@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { AgoraService } from '../services/agora.service';
 
 @Component({
@@ -7,6 +7,10 @@ import { AgoraService } from '../services/agora.service';
   styleUrls: ['./call.component.scss'],
 })
 export class CallComponent implements OnInit {
+
+  @ViewChild("localVideo", { static: true }) localVideo: any;
+  @ViewChild("remoteVideo", { static: true }) remoteVideo: any;
+  @ViewChild("screenVideo", { static: true }) screenVideo: any;
 
   apiMessages = '';
   uid = Math.floor(Math.random() * 1000);

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ElementRef, Injectable } from '@angular/core';
 import { Buffer } from 'buffer';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 import { RtcTokenBuilder, RtcRole } from 'agora-token';
@@ -49,6 +49,14 @@ export class AgoraService {
         this.channelParameters.remoteAudioTrack = user.audioTrack;
         // Play the remote audio track.
         this.channelParameters.remoteAudioTrack.play();
+        this.message.next('Remote user connected: ' + user.uid);
+      }
+      if (mediaType == 'video') {
+        this.channelParameters.remoteUid = user.uid;
+        // Get the RemoteVideoTrack object from the AgoraRTCRemoteUser object.
+        this.channelParameters.remoteVideoTrack = user.videoTrack;
+        // Play the remote video track.
+        this.channelParameters.remoteVideoTrack.play('remoteContainer');
         this.message.next('Remote user connected: ' + user.uid);
       }
 
@@ -140,6 +148,7 @@ export class AgoraService {
   async leave() {
     this.channelParameters.localAudioTrack.close();
     this.channelParameters.localVideoTrack.close();
+    this.channelParameters.remoteVideoTrack.close();
     this.channelParameters.screenTrack.close();
     await this.agoraEngine.leave();
     console.log('You left the channel');
