@@ -1,18 +1,18 @@
 <a href="/">Home</a>
 <div>
-  <span *ngIf="apiMessages">{{ apiMessages }}</span>
+  <span *ngIf="message">{{ message }}</span>
 </div>
 <div>
-  <button type="button" id="token" (click)="token()">generate token</button>
-  <button type="button" id="join" (click)="join()">Join</button>
+  <button type="button" id="join" (click)="join()">Join Audio</button>
+  <button type="button" id="join_video" (click)="join()">Start Video</button>
   <button type="button" id="leave" (click)="leave()">Leave</button>
 </div>
 <div>
   <button type="button" id="inItScreen" (click)="inItScreen()">
-    {{ isSharingEnabled ? "Stop Sharing" : "Start Sharing" }}
+    {{ isSharingEnabled ? "Stop Sharing" : "Share Screen" }}
   </button>
-  <button type="button" id="muteVideo" (click)="muteVideo()">Mute Video</button>
-  <br /><label> Local Audio Level :</label>
+  <!-- <button type="button" id="muteVideo" (click)="muteVideo()">Mute Video</button> -->
+  <!-- <br /><label> Local Audio Level :</label>
   <input
     type="range"
     min="0"
@@ -31,7 +31,7 @@
     step="1"
     #rav
     (change)="remoteAudioVolume(rav.value)"
-  />
+  /> -->
 </div>
 <div class="video-wrapper" id="screenContainer"></div>
 <div class="video-wrapper" id="remoteVideoContainer"></div>
