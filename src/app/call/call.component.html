@@ -4,15 +4,17 @@
 </div>
 <div>
   <button type="button" id="join" (click)="join()">Join Audio</button>
-  <button type="button" id="join_video" (click)="join()">Start Video</button>
-  <button type="button" id="leave" (click)="leave()">Leave</button>
+  <button type="button" id="joinVideo" (click)="joinVideo()">Start Video</button>
+  <button type="button" id="shareScreen" (click)="shareScreen()">
+    {{ isSharingScreen ? "Stop Sharing" : "Share Screen" }}
+  </button>
 </div>
 <div>
-  <button type="button" id="inItScreen" (click)="inItScreen()">
-    {{ isSharingEnabled ? "Stop Sharing" : "Share Screen" }}
-  </button>
-  <!-- <button type="button" id="muteVideo" (click)="muteVideo()">Mute Video</button> -->
-  <!-- <br /><label> Local Audio Level :</label>
+  <button *ngIf="inCall" id="leave" (click)="leave()">Leave</button>
+</div>
+<!-- <div>
+  <button type="button" id="muteVideo" (click)="muteVideo()">Mute Video</button>
+  <br /><label> Local Audio Level :</label>
   <input
     type="range"
     min="0"
@@ -31,8 +33,8 @@
     step="1"
     #rav
     (change)="remoteAudioVolume(rav.value)"
-  /> -->
-</div>
+  />
+</div> -->
 <div class="video-wrapper" id="screenContainer"></div>
 <div class="video-wrapper" id="remoteVideoContainer"></div>
 <div class="video-wrapper" id="localVideoContainer"></div>

@@ -32,8 +32,9 @@ export class CallComponent implements OnInit {
   message = '';
   uid = Math.floor(Math.random() * 1000);
 
-  isSharingEnabled = false;
+  isSharingScreen = false;
   isMuteVideo = false;
+  inCall = false;
 
   agoraEngine: any;
 
@@ -71,6 +72,7 @@ export class CallComponent implements OnInit {
   }
 
   async join() {
+    this.inCall = true;
     console.log('Joining channel: ' + this.channel);
     await this.agoraEngine.join(
       this.appId,
@@ -98,17 +100,18 @@ export class CallComponent implements OnInit {
   }
 
   async leave() {
-    this.channelParameters.localAudioTrack.close();
-    this.channelParameters.localVideoTrack.close();
-    this.channelParameters.remoteVideoTrack.close();
-    this.channelParameters.screenTrack.close();
+    this.inCall = false;
+    this.channelParameters.localAudioTrack?.close();
+    this.channelParameters.localVideoTrack?.close();
+    this.channelParameters.remoteVideoTrack?.close();
+    this.channelParameters.screenTrack?.close();
     await this.agoraEngine.leave();
     console.log('You left the channel');
   }
 
-  async inItScreen() {
-    this.isSharingEnabled = !this.isSharingEnabled;
-    if (this.isSharingEnabled) {
+  async shareScreen() {
+    this.isSharingScreen = !this.isSharingScreen;
+    if (this.isSharingScreen) {
       this.channelParameters.screenTrack = await AgoraRTC.createScreenVideoTrack({ encoderConfig: '720p_3' });
       this.channelParameters.screenTrack.play('screenContainer');
       this.agoraEngine.unpublish([this.channelParameters.localVideoTrack]);
