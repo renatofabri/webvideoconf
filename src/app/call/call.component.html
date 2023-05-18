@@ -35,6 +35,10 @@
     (change)="remoteAudioVolume(rav.value)"
   />
 </div> -->
-<div class="video-wrapper" id="screenContainer"></div>
-<div class="video-wrapper" id="remoteVideoContainer"></div>
-<div class="video-wrapper" id="localVideoContainer"></div>
+
+<div class="video-wrapper" #userWrapper>
+  <div class="video-wrapper" #screenSharingContainer></div>
+  <div class="video-wrapper" #localVideoContainer></div>
+</div>
+<div #participantsWrapper class="participantsWrapper">
+</div>

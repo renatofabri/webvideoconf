@@ -6,3 +6,14 @@
     margin-right: 5px;
     margin-bottom: 5px;
 }
+
+.participantsWrapper {
+    & > div {
+        width: 320px;
+        height: 240px;
+        outline: 1px solid black;
+        float: left;
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+}

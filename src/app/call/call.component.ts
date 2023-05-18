@@ -1,14 +1,22 @@
+import { ElementRef } from '@angular/core';
+import { Renderer2 } from '@angular/core';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 
 interface ChannelParameters {
   localAudioTrack: any;
   localVideoTrack: any;
-  remoteAudioTrack: any;
-  remoteVideoTrack: any;
+  connectedUsers: ConnectedUser[];
   screenTrack: any;
-  remoteUid: any;
 }
+
+interface ConnectedUser {
+  uid: number;
+  audioTrack: any;
+  videoTrack: any;
+  videoContainer: ElementRef;
+}
+
 @Component({
   selector: 'app-call',
   templateUrl: './call.component.html',
@@ -16,18 +24,18 @@ interface ChannelParameters {
 })
 export class CallComponent implements OnInit {
 
+  @ViewChild("localVideoContainer", { static: false }) localVideoContainer!: ElementRef;
+  @ViewChild("screenSharingContainer", { static: false }) screenSharingContainer!: ElementRef;
+
+  @ViewChild("participantsWrapper", { static: false }) participantsWrapper!: ElementRef;
+  @ViewChild("remoteVideoContainer", { static: false }) remoteVideoContainer!: ElementRef;
+
   channelParameters: ChannelParameters = {
     localAudioTrack: null,
     localVideoTrack: null,
-    remoteAudioTrack: null,
-    remoteVideoTrack: null,
+    connectedUsers: [],
     screenTrack: null,
-    remoteUid: null,
   };
-
-  @ViewChild("localVideoContainer", { static: true }) localVideoContainer: any;
-  @ViewChild("remoteVideoContainer", { static: true }) remoteVideoContainer: any;
-  @ViewChild("screenContainer", { static: true }) screenContainer: any;
 
   message = '';
   uid = Math.floor(Math.random() * 1000);
@@ -38,7 +46,7 @@ export class CallComponent implements OnInit {
 
   agoraEngine: any;
 
-  constructor() {}
+  constructor(private renderer: Renderer2) {}
 
   ngOnInit(): void {
     this.message = '';
@@ -51,16 +59,32 @@ export class CallComponent implements OnInit {
       console.log('subscribe success');
 
       if (mediaType == 'audio') {
-        this.channelParameters.remoteUid = user.uid;
-        this.channelParameters.remoteAudioTrack = user.audioTrack;
-        this.channelParameters.remoteAudioTrack.play();
+        let userIdx = this.channelParameters.connectedUsers.findIndex((user) => user.uid === user.uid);
+        if (userIdx === -1) {
+          let newLength = this.channelParameters.connectedUsers.push({
+            uid: user.uid,
+            audioTrack: user.audioTrack,
+            videoTrack: null,
+            videoContainer: this.renderer.createElement('div'),
+          });
+          userIdx = newLength - 1;
+          console.log("console", this.channelParameters.connectedUsers);
+          this.participantsWrapper.nativeElement.appendChild(this.channelParameters.connectedUsers[userIdx].videoContainer);
+        } else {
+          this.channelParameters.connectedUsers[userIdx].audioTrack = user.audioTrack;
+        }
+
+        this.channelParameters.connectedUsers[userIdx].audioTrack.play();
         this.message = 'Remote user connected: ' + user.uid;
       }
 
       if (mediaType == 'video') {
-        this.channelParameters.remoteUid = user.uid;
-        this.channelParameters.remoteVideoTrack = user.videoTrack;
-        this.channelParameters.remoteVideoTrack.play('remoteVideoContainer');
+        let userIdx = this.channelParameters.connectedUsers.findIndex((user) => user.uid === user.uid);
+        if (userIdx === -1) {
+          console.error("User not found");
+        }
+        this.channelParameters.connectedUsers[userIdx].videoTrack = user.videoTrack;
+        this.channelParameters.connectedUsers[userIdx].videoTrack.play(this.channelParameters.connectedUsers[userIdx].videoContainer);
         this.message = 'Remote user connected: ' + user.uid;
       }
 
@@ -83,16 +107,18 @@ export class CallComponent implements OnInit {
 
     this.channelParameters.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
 
-    this.channelParameters.remoteVideoTrack?.play('remoteVideoContainer');
-
     await this.agoraEngine.publish([
       this.channelParameters.localAudioTrack,
     ]);
+
+    this.channelParameters.connectedUsers.forEach((user) => {
+      user.videoTrack?.play(user.videoContainer?.nativeElement);
+    });
   }
   async joinVideo() {
     console.log('Joining video: ' + this.channel);
     this.channelParameters.localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-    this.channelParameters.localVideoTrack.play('localVideoContainer');
+    this.channelParameters.localVideoTrack.play(this.localVideoContainer.nativeElement);
 
     await this.agoraEngine.publish([
       this.channelParameters.localVideoTrack,
@@ -103,7 +129,11 @@ export class CallComponent implements OnInit {
     this.inCall = false;
     this.channelParameters.localAudioTrack?.close();
     this.channelParameters.localVideoTrack?.close();
-    this.channelParameters.remoteVideoTrack?.close();
+    this.channelParameters.connectedUsers.forEach((user) => {
+      user.audioTrack?.close();
+      user.videoTrack?.close();
+      user.videoContainer?.nativeElement.remove();
+    });
     this.channelParameters.screenTrack?.close();
     await this.agoraEngine.leave();
     console.log('You left the channel');
@@ -113,7 +143,7 @@ export class CallComponent implements OnInit {
     this.isSharingScreen = !this.isSharingScreen;
     if (this.isSharingScreen) {
       this.channelParameters.screenTrack = await AgoraRTC.createScreenVideoTrack({ encoderConfig: '720p_3' });
-      this.channelParameters.screenTrack.play('screenContainer');
+      this.channelParameters.screenTrack.play(this.screenSharingContainer.nativeElement);
       this.agoraEngine.unpublish([this.channelParameters.localVideoTrack]);
       this.agoraEngine.publish([this.channelParameters.screenTrack]);
       await this.channelParameters.localVideoTrack.replaceTrack(this.channelParameters.screenTrack, true);
