@@ -10,6 +10,11 @@ interface ChannelParameters {
   screenTrack: any;
 }
 
+interface AudioData {
+  track: any;
+  channels: any[];
+}
+
 interface ConnectedUser {
   uid: number;
   audioTrack: any;
@@ -23,6 +28,17 @@ interface ConnectedUser {
   styleUrls: ['./call.component.scss'],
 })
 export class CallComponent implements OnInit {
+
+  saveAsProject(){
+    this.writeContents(this.audioData?.channels, 'sample'+'.txt', 'text/plain');
+  }
+  writeContents(content: any, fileName: string, contentType:string) {
+    var a = document.createElement('a');
+    var file = new Blob([content], {type: contentType});
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
+  }
 
   @ViewChild("localVideoContainer", { static: false }) localVideoContainer!: ElementRef;
   @ViewChild("screenSharingContainer", { static: false }) screenSharingContainer!: ElementRef;
@@ -44,7 +60,10 @@ export class CallComponent implements OnInit {
   isMuteVideo = false;
   inCall = false;
 
+  audioData: AudioData= {track: null, channels: []};
+
   agoraEngine: any;
+
 
   constructor(private renderer: Renderer2) {}
 
@@ -105,7 +124,19 @@ export class CallComponent implements OnInit {
       this.uid);
     console.log('joined');
 
-    this.channelParameters.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+    this.channelParameters.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack().then(
+      (track) => {
+        // get raw data
+        this.audioData.track = track;
+        this.audioData.track.setAudioFrameCallback((buffer: any) => {
+          for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
+            const currentChannelData = buffer.getChannelData(channel);
+            console.log("PCM data in channel", channel, currentChannelData);
+            this.audioData.channels.push(currentChannelData);
+          }
+        });
+      }
+    );
 
     await this.agoraEngine.publish([
       this.channelParameters.localAudioTrack,
@@ -126,6 +157,20 @@ export class CallComponent implements OnInit {
   }
 
   async leave() {
+    console.log("leave");
+    this.audioData.track?.setAudioFrameCallback(null);
+    console.log("setAudioFrameCallback");
+    this.audioData.track?.close();
+    console.log("track close");
+    var sine = [];
+    for (var i=0; i<10000; i++) {
+      sine[i] = 128+Math.round(127*Math.sin(i/5));
+    }
+    console.log("pcm sine generated", sine);
+    console.log("pcm", this.audioData?.channels);
+    console.log("pcm", Array.from(this.audioData.channels));
+    new (pcm as any)({channels: 1, rate: 8000, depth: 8}).toWav(sine).play()
+    console.log("pcm played");
     this.inCall = false;
     this.channelParameters.localAudioTrack?.close();
     this.channelParameters.localVideoTrack?.close();

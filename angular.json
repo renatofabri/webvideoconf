@@ -32,7 +32,9 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "libs/pcm.js"
+            ]
           },
           "configurations": {
             "production": {
