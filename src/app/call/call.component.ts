@@ -2,6 +2,7 @@ import { ElementRef } from '@angular/core';
 import { Renderer2 } from '@angular/core';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import AgoraRTC from 'agora-rtc-sdk-ng';
+import { environment } from '../../envs/environment.dev';
 
 interface ChannelParameters {
   localAudioTrack: any;
@@ -64,7 +65,6 @@ export class CallComponent implements OnInit {
 
   agoraEngine: any;
 
-
   constructor(private renderer: Renderer2) {}
 
   ngOnInit(): void {
@@ -116,11 +116,11 @@ export class CallComponent implements OnInit {
 
   async join() {
     this.inCall = true;
-    console.log('Joining channel: ' + this.channel);
+    console.log('Joining channel: ' + environment.agora.channel);
     await this.agoraEngine.join(
-      this.appId,
-      this.channel,
-      this.rtcToken,
+      environment.agora.appId,
+      environment.agora.channel,
+      environment.agora.rtcToken,
       this.uid);
     console.log('joined');
 
@@ -147,7 +147,7 @@ export class CallComponent implements OnInit {
     });
   }
   async joinVideo() {
-    console.log('Joining video: ' + this.channel);
+    console.log('Joining video: ' + environment.agora.channel);
     this.channelParameters.localVideoTrack = await AgoraRTC.createCameraVideoTrack();
     this.channelParameters.localVideoTrack.play(this.localVideoContainer.nativeElement);
 

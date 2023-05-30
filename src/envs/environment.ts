@@ -1,8 +1,13 @@
 export const environment = {
-  production: false,
   agora: {
+    channel: '',
     appId: '',
     appCertificate: '',
-    expirationTimeInSeconds: 3600,
+    rtcToken: '',
+  },
+  s3: {
+    bucket: '',
+    accessKey: '',
+    secretKey: '',
   },
 };
