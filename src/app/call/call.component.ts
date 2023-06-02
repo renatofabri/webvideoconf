@@ -3,6 +3,7 @@ import { Renderer2 } from '@angular/core';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 import { environment } from '../../envs/environment.dev';
+import { AgoraService } from '../services/agora.service';
 
 interface ChannelParameters {
   localAudioTrack: any;
@@ -65,7 +66,7 @@ export class CallComponent implements OnInit {
 
   agoraEngine: any;
 
-  constructor(private renderer: Renderer2) {}
+  constructor(private renderer: Renderer2, private agoraService: AgoraService) {}
 
   ngOnInit(): void {
     this.message = '';
@@ -205,5 +206,16 @@ export class CallComponent implements OnInit {
   }
   remoteAudioVolume(val: any) {
     console.log(val);
+  }
+
+  startRecording() {
+    this.agoraService.acquireResourceId().subscribe(
+      (res) => {
+        console.log('record:acquire', res);
+        this.agoraService.startRecording(environment.agora.channel, res.resourceId).subscribe(
+          (res) => {
+            console.log('record:start', res);
+          });
+        });
   }
 }

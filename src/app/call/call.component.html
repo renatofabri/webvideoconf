@@ -3,6 +3,7 @@
   <span *ngIf="message">{{ message }}</span>
 </div>
 <div>
+  <button (click)="startRecording()">Start Recording</button>
   <button type="button" id="join" (click)="join()">Join Audio</button>
   <button type="button" id="joinVideo" (click)="joinVideo()">Start Video</button>
   <button type="button" id="shareScreen" (click)="shareScreen()">
@@ -42,4 +43,3 @@
 </div>
 <div #participantsWrapper class="participantsWrapper">
 </div>
-<button class="file-button" (click)="saveAsProject()">Save As</button>

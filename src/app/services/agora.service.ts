@@ -1,14 +1,37 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from "@angular/common/http";
 import { environment } from "../../envs/environment.dev";
-import { env } from 'process';
+import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class AgoraService {
   constructor(private _http: HttpClient) {}
 
-  startRecording(channelName: string) {
+  getHeaders() {
+    const plainCredential = `${environment.agora.appId}:${environment.agora.appCertificate}`;
+    var encodedCredential = btoa(plainCredential);
+    console.log('record:credential', encodedCredential);
+    return {
+        Authorization: `Basic ${encodedCredential}`,
+        "Content-Type": "application/json",
+      }
+  }
+
+  acquireResourceId(): Observable<any> {
     const url: string = `https://api.agora.io/v1/apps/${environment.agora.appId}/cloud_recording/acquire`;
+    const body = {
+      cname: environment.agora.channel,
+      uid: 80085,
+      clientRequest: {
+        region: "NA",
+        "resourceExpiredHour": 24
+      }
+    }
+    return this._http.post(url, body, { headers: this.getHeaders() });
+  }
+
+  startRecording(channelName: string, resourceId: string, mode="mix"): Observable<any> {
+    const url: string = `https://api.agora.io/v1/apps/${environment.agora.appId}/cloud_recording/resourceid/${resourceId}/mode/${mode}/start`;
     const body = {
       cname: channelName,
       uid: 80085,
@@ -16,22 +39,8 @@ export class AgoraService {
         token: environment.agora.rtcToken,
         recordingConfig: {
           maxIdleTime: 30,
-          streamTypes: 2,
-          channelType: 1,
-          videoStreamType: 0,
-          transcodingConfig: {
-            height: 640,
-            width: 360,
-            bitrate: 500,
-            fps: 15,
-            mixedVideoLayout: 1,
-            backgroundColor: "#FF0000",
-          },
-          subscribeVideoUids: [],
-          subscribeAudioUids: [],
-        },
-        recordingFileConfig: {
-          avFileType: ["hls"],
+          streamTypes: 0, // only audio
+          channelType: 0,
         },
         storageConfig: {
           vendor: 1, // S3
@@ -42,10 +51,18 @@ export class AgoraService {
         }
       }
     }
-    this._http.post(url, body).subscribe((res) => {
-      console.log(res);
-    });
-
+    return this._http.post(url, body, { headers: this.getHeaders() });
   }
-  stopRecording() {}
+
+  stopRecording(channelName: string, resourceId: string, sid: string, mode="mix"): Observable<any> {
+    const url: string = `https://api.agora.io/v1/apps/${environment.agora.appId}/cloud_recording/resourceid/${resourceId}/sid/${sid}/mode/${mode}/stop`;
+    const body = {
+      cname: channelName,
+      uid: 80085,
+      clientRequest: {
+        token: environment.agora.rtcToken,
+      }
+    }
+    return this._http.post(url, body, { headers: this.getHeaders() });
+  }
 }
