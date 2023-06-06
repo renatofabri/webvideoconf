@@ -8,7 +8,7 @@ export class AgoraService {
   constructor(private _http: HttpClient) {}
 
   getHeaders() {
-    const plainCredential = `${environment.agora.appId}:${environment.agora.appCertificate}`;
+    const plainCredential = `${environment.agora.customerKey}:${environment.agora.customerSecret}`;
     var encodedCredential = btoa(plainCredential);
     console.log('record:credential', encodedCredential);
     return {

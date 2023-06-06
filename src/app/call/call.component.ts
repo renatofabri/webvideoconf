@@ -62,6 +62,9 @@ export class CallComponent implements OnInit {
   isMuteVideo = false;
   inCall = false;
 
+  resourceId = '';
+  sid = '';
+
   audioData: AudioData= {track: null, channels: []};
 
   agoraEngine: any;
@@ -214,8 +217,14 @@ export class CallComponent implements OnInit {
         console.log('record:acquire', res);
         this.agoraService.startRecording(environment.agora.channel, res.resourceId).subscribe(
           (res) => {
+            this.resourceId = res.resourceId;
+            this.sid = res.sid;
             console.log('record:start', res);
           });
         });
+  }
+  stopRecording() {
+    this.agoraService.stopRecording(environment.agora.channel, this.resourceId, this.sid).subscribe(
+      (res) => console.log('record:stop', res));
   }
 }
