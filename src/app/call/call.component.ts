@@ -121,6 +121,7 @@ export class CallComponent implements OnInit {
   async join() {
     this.inCall = true;
     console.log('Joining channel: ' + environment.agora.channel);
+    console.log("joining id", this.uid);
     await this.agoraEngine.join(
       environment.agora.appId,
       environment.agora.channel,
@@ -135,7 +136,7 @@ export class CallComponent implements OnInit {
         this.audioData.track.setAudioFrameCallback((buffer: any) => {
           for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
             const currentChannelData = buffer.getChannelData(channel);
-            console.log("PCM data in channel", channel, currentChannelData);
+            // console.log("PCM data in channel", channel, currentChannelData);
             this.audioData.channels.push(currentChannelData);
           }
         });

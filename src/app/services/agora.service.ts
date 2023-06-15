@@ -17,11 +17,11 @@ export class AgoraService {
       }
   }
 
-  acquireResourceId(): Observable<any> {
+  acquireResourceId(channelName=environment.agora.channel): Observable<any> {
     const url: string = `https://api.agora.io/v1/apps/${environment.agora.appId}/cloud_recording/acquire`;
     const body = {
-      cname: environment.agora.channel,
-      uid: 80085,
+      cname: channelName,
+      uid: "80085",
       clientRequest: {
         region: "NA",
         "resourceExpiredHour": 24
@@ -34,13 +34,12 @@ export class AgoraService {
     const url: string = `https://api.agora.io/v1/apps/${environment.agora.appId}/cloud_recording/resourceid/${resourceId}/mode/${mode}/start`;
     const body = {
       cname: channelName,
-      uid: 80085,
+      uid: "80085",
       clientRequest: {
         token: environment.agora.rtcToken,
         recordingConfig: {
-          maxIdleTime: 30,
-          streamTypes: 0, // only audio
           channelType: 0,
+          streamTypes: 0, // only audio
         },
         storageConfig: {
           vendor: 1, // S3
@@ -48,7 +47,8 @@ export class AgoraService {
           bucket: environment.s3.bucket,
           accessKey: environment.s3.accessKey,
           secretKey: environment.s3.secretKey,
-        }
+          fileNamePrefix: ["agora", "recording", "test"],
+        },
       }
     }
     return this._http.post(url, body, { headers: this.getHeaders() });
@@ -58,10 +58,8 @@ export class AgoraService {
     const url: string = `https://api.agora.io/v1/apps/${environment.agora.appId}/cloud_recording/resourceid/${resourceId}/sid/${sid}/mode/${mode}/stop`;
     const body = {
       cname: channelName,
-      uid: 80085,
-      clientRequest: {
-        token: environment.agora.rtcToken,
-      }
+      uid: "80085",
+      clientRequest: { }
     }
     return this._http.post(url, body, { headers: this.getHeaders() });
   }
