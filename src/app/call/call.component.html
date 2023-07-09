@@ -3,13 +3,17 @@
   <span *ngIf="message">{{ message }}</span>
 </div>
 <div>
-  <button (click)="startRecording()">Start Recording</button>
-  <button (click)="stopRecording()">Stop Recording</button>
-  <button type="button" id="join" (click)="join()">Join Audio</button>
-  <button type="button" id="joinVideo" (click)="joinVideo()">Start Video</button>
-  <button type="button" id="shareScreen" (click)="shareScreen()">
-    {{ isSharingScreen ? "Stop Sharing" : "Share Screen" }}
-  </button>
+  <div>
+    <button (click)="startRecording()">Start Recording</button>
+    <button (click)="stopRecording()">Stop Recording</button>
+  </div>
+  <div>
+    <button type="button" id="join" (click)="join()">Join Audio</button>
+    <button type="button" id="joinVideo" (click)="joinVideo()">Start Video</button>
+    <button type="button" id="shareScreen" (click)="shareScreen()">
+      {{ isSharingScreen ? "Stop Sharing" : "Share Screen" }}
+    </button>
+  </div>
 </div>
 <div>
   <button *ngIf="inCall" id="leave" (click)="leave()">Leave</button>
@@ -37,7 +41,11 @@
     (change)="remoteAudioVolume(rav.value)"
   />
 </div> -->
-
+<div class="participants">
+  <p *ngFor="let user of channelParameters?.connectedUsers">
+    {{ user.uid }}
+  </p>
+</div>
 <div class="video-wrapper" #userWrapper>
   <div class="video-wrapper" #screenSharingContainer></div>
   <div class="video-wrapper" #localVideoContainer></div>

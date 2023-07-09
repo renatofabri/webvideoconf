@@ -56,7 +56,8 @@ export class CallComponent implements OnInit {
   };
 
   message = '';
-  uid = Math.floor(Math.random() * 1000);
+  uid = `${Math.floor(Math.random() * 1000) + 222}`;
+  // uid = "198";
 
   isSharingScreen = false;
   isMuteVideo = false;
@@ -112,8 +113,9 @@ export class CallComponent implements OnInit {
       }
 
       this.agoraEngine.on('user-unpublished', (user: any) => {
-        console.log(user.uid + 'has left the channel');
-        this.message = 'Remote user has left the channel';
+        this.message = `${user.uid} user has left the channel`;
+        var idxToRemove = this.channelParameters.connectedUsers.findIndex((user) => user.uid === user.uid);
+        this.channelParameters.connectedUsers.splice(idxToRemove, 1);
       });
     });
   }
@@ -125,23 +127,12 @@ export class CallComponent implements OnInit {
     await this.agoraEngine.join(
       environment.agora.appId,
       environment.agora.channel,
-      environment.agora.rtcToken,
-      this.uid);
-    console.log('joined');
+      environment.agora.rtcToken).then((uid: any) => {
+        console.log('joined', {localUid: this.uid, genUid: uid});
+      });
 
-    this.channelParameters.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack().then(
-      (track) => {
-        // get raw data
-        this.audioData.track = track;
-        this.audioData.track.setAudioFrameCallback((buffer: any) => {
-          for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
-            const currentChannelData = buffer.getChannelData(channel);
-            // console.log("PCM data in channel", channel, currentChannelData);
-            this.audioData.channels.push(currentChannelData);
-          }
-        });
-      }
-    );
+    // maybe always join the channel, but publish local audio only after the user clicks on the button join
+    this.channelParameters.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
 
     await this.agoraEngine.publish([
       this.channelParameters.localAudioTrack,
@@ -171,18 +162,14 @@ export class CallComponent implements OnInit {
     for (var i=0; i<10000; i++) {
       sine[i] = 128+Math.round(127*Math.sin(i/5));
     }
-    console.log("pcm sine generated", sine);
-    console.log("pcm", this.audioData?.channels);
-    console.log("pcm", Array.from(this.audioData.channels));
-    new (pcm as any)({channels: 1, rate: 8000, depth: 8}).toWav(sine).play()
-    console.log("pcm played");
+
     this.inCall = false;
     this.channelParameters.localAudioTrack?.close();
     this.channelParameters.localVideoTrack?.close();
     this.channelParameters.connectedUsers.forEach((user) => {
       user.audioTrack?.close();
       user.videoTrack?.close();
-      user.videoContainer?.nativeElement.remove();
+      user.videoContainer?.nativeElement?.remove();
     });
     this.channelParameters.screenTrack?.close();
     await this.agoraEngine.leave();
